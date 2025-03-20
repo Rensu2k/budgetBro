@@ -4,13 +4,13 @@ import { COLORS, FONT, SIZES } from "../../constants";
 
 const styles = StyleSheet.create({
   parentContainer: {
-    flexDirection: 'column', // Ensure the child views are displayed in a column
-    alignItems: 'center', // Center the child views horizontally
+    flexDirection: "column", // Ensure the child views are displayed in a column
+    alignItems: "center", // Center the child views horizontally
     padding: 10,
   },
   footerContainer: {
     // Your container styles
-    
+
     padding: 10,
     bottom: 0,
     left: 0,
@@ -67,8 +67,6 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     color: COLORS.primary,
   },
-  
-  
 });
 
 export default styles;

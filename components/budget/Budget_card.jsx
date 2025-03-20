@@ -1,104 +1,113 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, Modal, TextInput, AppState } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import styles from './Budget_card.style.jsx';
-import { icons } from '../../constants/index.js';
-import * as DB from '../../database/envelopeDB.js';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Modal,
+  TextInput,
+  AppState,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import styles from "./Budget_card.style.jsx";
+import { icons } from "../../constants/index.js";
+import * as DB from "../../database/envelopeDB.js";
 
 const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,initializedDB,setInitializedDB }) => {
-  
+const Budget_card = ({
+  env_id,
+  title,
+  dateCreated,
+  shadowVisible,
+  setRefresh,
+  initializedDB,
+  setInitializedDB,
+}) => {
   const [refreshLocal, setRefreshLocal] = useState(false); // Local refresh state
   const [remainingAllocation, setRemainingAllocation] = useState(0); // Remaining allocation state
   const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
   const [newTitle, setNewTitle] = useState(title); // New title state
-  const [notificationMessage, setNotificationMessage] = useState(''); // Notification message state
+  const [notificationMessage, setNotificationMessage] = useState(""); // Notification message state
   const [notificationVisible, setNotificationVisible] = useState(false); // Notification modal visibility state
   const navigation = useNavigation();
-  const [entryUpdate, setEntryUpdate] = useState(false); 
+  const [entryUpdate, setEntryUpdate] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false); // Delete confirmation modal visibility state
 
-  
-    const fetchRemainingAllocation = async () => {
-      try {
-        const allocation = await DB.getRemainingAllocation(env_id);
-        //console.log("Total Allocation for this budget: ", allocation);
-        if(allocation === null){
-          setRemainingAllocation('0.00');
-        }else {
-          setRemainingAllocation(parseFloat(allocation).toFixed(2));
-        }
-        
-      } catch (error) {
-        console.error("Error fetching remaining allocation:", error);
+  const fetchRemainingAllocation = async () => {
+    try {
+      const allocation = await DB.getRemainingAllocation(env_id);
+      //console.log("Total Allocation for this budget: ", allocation);
+      if (allocation === null) {
+        setRemainingAllocation("0.00");
+      } else {
+        setRemainingAllocation(parseFloat(allocation).toFixed(2));
       }
-    };
+    } catch (error) {
+      console.error("Error fetching remaining allocation:", error);
+    }
+  };
 
-  useEffect(() => {   
-    fetchRemainingAllocation();     
+  useEffect(() => {
+    fetchRemainingAllocation();
   }, [refreshLocal]);
 
   useEffect(() => {
-      const subscription = AppState.addEventListener('change', (nextAppState) => {
-        if (nextAppState === 'active') {
-           // App has come to the foreground, refresh data
-           fetchRemainingAllocation();
-        }
-      });
-  
-      return () => {
-        subscription.remove();
-      };
-    }, []);
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        // App has come to the foreground, refresh data
+        fetchRemainingAllocation();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const handleUpdateTitle = async () => {
     if (!newTitle) {
-      setNotificationMessage('Budget name is required');
+      setNotificationMessage("Budget name is required");
       setNotificationVisible(true);
       return; // Exit the function if title is empty
-    }   
-
+    }
 
     try {
       await DB.updateEnvelope(env_id, newTitle); // Assuming you have this function in your DB module
       // setRefreshLocal(!refreshLocal); // Trigger local refresh
       setModalVisible(false); // Close the modal
-      setNotificationMessage('Entry updated successfully');
+      setNotificationMessage("Entry updated successfully");
       setNotificationVisible(true); // Show notification modal
-      setEntryUpdate(true); 
-       
+      setEntryUpdate(true);
     } catch (error) {
-      console.error('Error updating title:', error);
+      console.error("Error updating title:", error);
     }
   };
-
 
   const handleNotificationOk = () => {
     setNotificationVisible(false); // Close notification modal
     if (entryUpdate) {
-      setRefresh(prev => !prev); // Trigger refresh in parent component       
+      setRefresh((prev) => !prev); // Trigger refresh in parent component
       setEntryUpdate(false); // Reset setEntryUpdate state
     }
   };
 
-
-   const handleDelete = async () => {
-      try {
-        await DB.deleteEnvelopeDetailByENV_ID(env_id);
-        await DB.deleteEnvelope(env_id);
-        //console.log('Entry deleted successfully');
-        setNotificationMessage('Entry deleted successfully');
-        setNotificationVisible(true); // Show notification modal
-        setDeleteModalVisible(false); // Close the delete confirmation modal
-        setEntryUpdate(true);
-      } catch (error) {
-        console.error('Error deleting entry:', error);
-      }
-    };
+  const handleDelete = async () => {
+    try {
+      await DB.deleteEnvelopeDetailByENV_ID(env_id);
+      await DB.deleteEnvelope(env_id);
+      //console.log('Entry deleted successfully');
+      setNotificationMessage("Entry deleted successfully");
+      setNotificationVisible(true); // Show notification modal
+      setDeleteModalVisible(false); // Close the delete confirmation modal
+      setEntryUpdate(true);
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+    }
+  };
 
   return (
     // <View style={[
@@ -107,17 +116,15 @@ const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,init
     //   type === 'Expense' && styles.expenseBackground // Apply pink background if type is Expense
     // ]}></View>
 
-
-    <View style={[
-                    styles.container, 
-                    shadowVisible && styles.shadow,
-                    remainingAllocation < 0 && styles.negativeBudgetBackground
-                    ]}>
+    <View
+      style={[
+        styles.container,
+        shadowVisible && styles.shadow,
+        remainingAllocation < 0 && styles.negativeBudgetBackground,
+      ]}
+    >
       {/* Main Content Section */}
-      <TouchableOpacity
-        style={[styles.cardContainer]}
-       
-      >
+      <TouchableOpacity style={[styles.cardContainer]}>
         <View style={styles.textContainer}>
           {/* Left Side: Title and Amount */}
           <View style={styles.leftContainer}>
@@ -125,12 +132,15 @@ const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,init
               {title}
             </Text>
             <Text style={styles.jobType}>
-                Remaining Budget: 
-                <Text style={styles.remainingAllocation}> {remainingAllocation}</Text>
+              Remaining Budget:
+              <Text style={styles.remainingAllocation}>
+                {" "}
+                {remainingAllocation}
+              </Text>
             </Text>
             <Text style={styles.jobType}>
-                Date Added: 
-                <Text style={styles.dateCreated}> {formatDate(dateCreated)}</Text>
+              Date Added:
+              <Text style={styles.dateCreated}> {formatDate(dateCreated)}</Text>
             </Text>
           </View>
 
@@ -155,7 +165,17 @@ const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,init
             </TouchableOpacity>
 
             {/* View Details Button */}
-            <TouchableOpacity onPress={() => navigation.navigate('BudgetDetailList', { envId: env_id, title: title,refreshBudList:setRefreshLocal,initializedDB:initializedDB,setInitializedDB:setInitializedDB })}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("BudgetDetailList", {
+                  envId: env_id,
+                  title: title,
+                  refreshBudList: setRefreshLocal,
+                  initializedDB: initializedDB,
+                  setInitializedDB: setInitializedDB,
+                })
+              }
+            >
               <Image
                 source={icons.editListIcon}
                 resizeMode="contain"
@@ -209,12 +229,11 @@ const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,init
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Are you sure you want to delete  {title}?</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete {title}?
+            </Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleDelete}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleDelete}>
                 <Text style={styles.buttonText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -226,7 +245,7 @@ const Budget_card = ({ env_id, title, dateCreated, shadowVisible,setRefresh,init
             </View>
           </View>
         </View>
-      </Modal> 
+      </Modal>
 
       {/* Notification Modal */}
       <Modal

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MyEnvelopeBudgetApp",
-    "slug": "MyEnvelopeBudgetApp",
+    "name": "BudgetBro",
+    "slug": "BudgetBro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/Envelope_Budget_Icon.png",
@@ -20,14 +20,12 @@
         "foregroundImage": "./assets/Envelope_Budget_Icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.rianbangs.MyEnvelopeBudgetApp"
+      "package": "com.Rensu2k.BudgetBro"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-sqlite"
-    ],
+    "plugins": ["expo-sqlite", "expo-router"],
     "extra": {
       "eas": {
         "projectId": "3a12c73f-2b64-46f7-9ed3-58709748659c"
